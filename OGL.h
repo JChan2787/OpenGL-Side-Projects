@@ -30,17 +30,17 @@ public:
 	* Function   : InitializeExtensions 
 	* Purpose    : Initializes OpenGL extensions
 	* Parameters : n/a
-	* Returns    : bool
+	* Returns    : n/a
 	*/
-	bool InitializeExtensions();
+	void InitializeExtensions();
 
 	/*
 	* Function   : InitializeOGL 
 	* Purpose    : Initializes OpenGL
-	* Parameters : n/a
+	* Parameters : bool vSyncOn
 	* Returns    : bool
  	*/
-	bool InitializeOGL();
+	void InitializeOGL(bool vSyncOn);
 
 	/*
 	* Function   : BeginScene 
@@ -100,20 +100,31 @@ private:
 	* Function   : LoadExtensions
 	* Purpose    : Load extensions
 	* Parameters : n/a
-	* Returns    : bool
+	* Returns    : n/a
 	*/
-	bool LoadExtensions();
+	void LoadExtensions();
 
 	//Data Members:
 
 	//OpenGL objects
-	HDC m_deviceContext;
-	HGLRC m_renderingContext;
+	HDC m_deviceContext; //A device context is a windows data structure containing
+						 //information about the drawing attributes of a device
+						 //such as a display or a printer. Draw calls are made through
+						 //a device context object, which encapsulates Windows APIs	
+						 //for drawing lines, shapes, and text. DC's allow device
+						 //independent drawing in Windows. Can be used to draw on the
+					     //screen, printer, or a metafile.
+
+	HGLRC m_renderingContext; //A rendering context is used in OpenGL as a port in which
+							  //all OpenGL instructions pass through. All threads that 
+							  //make OpenGL calls must have a current rendering context. 
+							  //Rendering contexts link OpenGL to the Windows windowing
+							  //systems.
 	HWND m_hwnd;
 	PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribsARB;
 	
 	//Primitives
-	char m_videCardDescription[128];
+	char m_videoCardDescription[128];
 };
 
 #endif

@@ -38,6 +38,7 @@ void OGL::InitializeOGL(bool vSyncOn)
 	std::cout << "Initializing OpenGL..." << std::endl;
 
 	//Getting device
+	//----------------------------------------------------------------------------
 	//GetDC is a function that retrieves a handle to a device context (DC) for the 
 	//client area of a specified window or for the entire screen. You can use the
 	//returned handle in subsequent GDI functions to draw in the DC. The device
@@ -53,6 +54,7 @@ void OGL::InitializeOGL(bool vSyncOn)
 	}
 
 	//Query for a pixel format that will get attributes we want.
+	//----------------------------------------------------------------------------
 	//ChoosePixelFormat is a function that attempts to match an appropriate pixel
 	//format supported by a device context to a given pixel format specification.
 	//Source -- https://msdn.microsoft.com/en-us/library/windows/desktop/dd318284(v=vs.85).aspx
@@ -66,6 +68,7 @@ void OGL::InitializeOGL(bool vSyncOn)
 	}
 
 	//If the video card can handle desired pixel format
+	//----------------------------------------------------------------------------
 	//SetPixelFormat is a function that sets the pixel format of the specified
 	//device context to the format speficied by the iPixelFormat index.
 	//Source -- https://msdn.microsoft.com/en-us/library/windows/desktop/dd369049(v=vs.85).aspx
@@ -78,6 +81,7 @@ void OGL::InitializeOGL(bool vSyncOn)
 	}
 
 	//Make temporary context that will initialize OpenGL wrangler
+	//----------------------------------------------------------------------------
 	//wglCreateContext is a function that creates a new OpenGL rendering
 	//context, which is suitable for drawing on the device referenced by 
 	//hdc (in this case it's 'deviceContext'). The rendering context has
@@ -87,6 +91,7 @@ void OGL::InitializeOGL(bool vSyncOn)
 
 	//Set temporary rendering context as the current rendering context
 	//for this window.
+	//----------------------------------------------------------------------------
 	//wglMakeCurrent is a function that makes a specified OpenGL rendering context 
 	//the calling thread's current rendering context. All subsequent OpenGL calls 
 	//made by the thread are drawn on the device identified by HDC. Can also make
@@ -226,6 +231,8 @@ void OGL::InitializeExtensions()
 //Function definition for LoadExtensions
 void OGL::LoadExtensions()
 {
+	//Getting the address of our current rendering context.
+	//----------------------------------------------------------------------------
 	//wglGetProcAddress is a function that returns the address of an OpenGL extension function
 	//for use with the current OpenGL rendering context. 
 	//Source -- https://msdn.microsoft.com/en-us/library/windows/desktop/dd374386(v=vs.85).aspx
@@ -236,5 +243,64 @@ void OGL::LoadExtensions()
 	{
 		//Throw an exception
 		throw std::runtime_error("Address of OpenGL extension not valid -- OGL.cpp");
+	}
+}
+
+//Function definition for BeginScene
+void OGL::BeginScene(float red, float blue, float green, float alpha)
+{
+	//Clean the color buffers first, or else we might get garbage values.
+	//----------------------------------------------------------------------------
+	//glClearColor is a function in OpenGL that specifies the rgb & alpha values
+	//used by glClear to clear the color buffers. Values specified by this function
+	//are clamped to the range [0, 1].
+	//Source -- https://www.opengl.org/sdk/docs/man/
+	glClearColor(red, blue, green, alpha);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+//Function definition for EndScene
+void OGL::EndScene()
+{
+	//Empties all buffers in OpenGL.
+	glFlush();
+
+	//Exchange front and back buffers of the device context,
+	//if there is any.
+	//----------------------------------------------------------------------------
+	//SwapBuffers is a function that exchanges the front and end buffers if the 
+	//current pixel format for the window referenced by the specified device
+	//context includes a back buffer.
+	//Source -- https://msdn.microsoft.com/en-us/library/windows/desktop/dd369060(v=vs.85).aspx
+	SwapBuffers(m_deviceContext);
+
+	//Call this function to block any further instructions until
+	//all the gl instructions are finished.
+	glFinish();
+}
+
+//Function definition for Release
+void OGL::Release()
+{
+	//First check if the current rendering context is not null already
+	if(m_renderingContext)
+	{
+		//Make the current rendering context null
+		wglMakeCurrent(NULL, NULL);
+		
+		//Delete the current rendering context in our class
+		wglDeleteContext(m_renderingContext);
+
+		//Set it to zero just to be super sure
+		m_renderingContext = 0;
+	}
+
+	//Checks if the device context is not null
+	if(m_deviceContext)
+	{
+		//Releases the device device context, so other 
+		//applications can now use it.
+		ReleaseDC(m_hwnd, m_deviceContext);
+		m_deviceContext = 0;
 	}
 }
